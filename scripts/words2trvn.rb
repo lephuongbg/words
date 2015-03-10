@@ -7,6 +7,7 @@
 #
 require 'fileutils'
 
+# Deprecated as "công" will collide with "coong", leave this here as a reference
 unicode_to_telex_mapping = {
                "á" => "as",  "à" => "af",  "ả" => "ar",  "ã" => "ax",  "ạ" => "aj",
   "ă" => "aw", "ắ" => "aws", "ằ" => "awf", "ẳ" => "awr", "ẵ" => "awx", "ặ" => "awj",
@@ -22,6 +23,21 @@ unicode_to_telex_mapping = {
                "ý" => "ys",  "ỳ" => "yf",  "ỷ" => "yr",  "ỹ" => "yx",  "ỵ" => "yj",
   "đ" => "dd"
 }
+unicode_to_vni_mapping = {
+               "á" => "a1",  "à" => "a2",  "ả" => "a3",  "ã" => "a4",  "ạ" => "a5",
+  "ă" => "a8", "ắ" => "a81", "ằ" => "a82", "ẳ" => "a83", "ẵ" => "a84", "ặ" => "a85",
+  "â" => "a6", "ấ" => "a61", "ầ" => "a62", "ẩ" => "a63", "ẫ" => "a64", "ậ" => "a65",
+               "é" => "e1",  "è" => "e2",  "ẻ" => "e3",  "ẽ" => "e4",  "ẹ" => "e5",
+  "ê" => "e6", "ế" => "e61", "ề" => "e62", "ể" => "e63", "ễ" => "e64", "ệ" => "e65",
+               "í" => "i1",  "ì" => "i2",  "ỉ" => "i3",  "ĩ" => "i4",  "ị" => "i5",
+               "ó" => "o1",  "ò" => "o2",  "ỏ" => "o3",  "õ" => "o4",  "ọ" => "o5",
+  "ô" => "o6", "ố" => "o61", "ồ" => "o62", "ổ" => "o63", "ỗ" => "o64", "ộ" => "o65",
+  "ơ" => "o7", "ớ" => "o71", "ờ" => "o72", "ở" => "o73", "ỡ" => "o74", "ợ" => "o75",
+               "ú" => "u1",  "ù" => "u2",  "ủ" => "u3",  "ũ" => "u4",  "ụ" => "u5",
+  "ư" => "u7", "ứ" => "u71", "ừ" => "u72", "ử" => "u73", "ữ" => "u74", "ự" => "u75",
+               "ý" => "y1",  "ỳ" => "y2",  "ỷ" => "y3",  "ỹ" => "y4",  "ỵ" => "y5",
+  "đ" => "d9"  
+}
 
 train_fileids = []
 train_transcription = []
@@ -35,10 +51,10 @@ Dir.glob("wav/*").each_with_index do |user_dir, index|
     diacritic_stats[diacritic] = total
     test_count = total / 5
 
-    # Convert unicode name to ascii name using telex sequences
+    # Convert unicode name to ascii name using vni sequences
     dest_words = words.map do |word|
       dest_word = String.new word
-      unicode_to_telex_mapping.each do |k, v|
+      unicode_to_vni_mapping.each do |k, v|
         loop do
           dest_word[k] &&= v
           break if dest_word[k].nil?
@@ -55,7 +71,10 @@ Dir.glob("wav/*").each_with_index do |user_dir, index|
     end
 
     words.each_with_index do |word, word_idx|
-      print "\rCopy #{diacritic} #{(word_idx + 1) * 100 / total}%"
+      print "\rCopy #{user_dir}/#{diacritic} #{(word_idx + 1) * 100 / total}%"
+      if File.exists?(dest_words[word_idx])
+          throw Exception.new("duplicated file #{dest_words[word_idx]}")
+      end
       FileUtils.cp(word, dest_words[word_idx])
     end
     print "\n"
