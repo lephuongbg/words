@@ -6,7 +6,7 @@ form Analyze pitch maxima from labeled segments in files
     sentence Sound_directory /home/herop/projects/asr/words/trvn/wav/
     sentence Sound_file_extension .wav
     comment Full path of the resulting text file:
-    text resultfile /home/herop/projects/asr/words/trvn/result.txt
+    text resultfile /home/herop/projects/asr/words/trvn/result.csv
     
     comment Pitch analysis parameters
     positive Time_step 0.01
